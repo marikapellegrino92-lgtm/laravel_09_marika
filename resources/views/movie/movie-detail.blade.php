@@ -13,11 +13,11 @@
                 <div class="col-12 col-md-6 text-white d-flex flex-column justify-content-center align-items-center">
                     <h3>Titolo: {{ $movie['title'] }}</h3>
                     <h4>Regista: {{ $movie['director'] }}</h4>
-                    <p>Genere: {{ $movie['genres'] }}</p>
+                    <p>Genere: {{ $movie['genres'] ?? 'sconosciuto' }}</p>
                 </div>
 
                 <div class="col-12 col-md-6 d-flex justify-content-center">
-                    <img src="{{ $movie['img'] }}" alt="poster di {{ $movie['title'] }}">
+                    <img src="{{ $movie['img'] ?? '/media/poster/default.jpg' }}" alt="poster di {{ $movie['title'] }}">
                 </div>
 
             </div>

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Movie;
+
 test('the public pages render successfully', function (string $url, string $expected) {
     $this->get($url)
         ->assertOk()
@@ -22,4 +24,20 @@ test('the movie views live in the movie folder', function (string $view) {
 
 test('unknown movie returns not found', function () {
     $this->get('/movie/detail/999')->assertNotFound();
+});
+
+test('movie detail renders when optional fields are empty', function () {
+    $movie = Movie::create([
+        'title' => 'Film senza dettagli opzionali',
+        'director' => 'Regista di test',
+        'year' => '2026',
+        'plot' => 'Trama di test',
+        'genres' => null,
+        'img' => null,
+    ]);
+
+    $this->get(route('movie.detail', $movie))
+        ->assertOk()
+        ->assertSee('Genere: sconosciuto')
+        ->assertSee('/media/poster/default.jpg');
 });

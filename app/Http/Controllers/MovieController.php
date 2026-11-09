@@ -2,28 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Movie;
 use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
-    public $movies = [
-        ['id' => 1, 'title' => 'Incontri ravvicinati del terzo tipo', 'director' => 'S. Spielberg', 'img' => '/media/poster/spielberg.jpg', 'genres' => 'sci-fi'],
-        ['id' => 2, 'title' => '1917', 'director' => 'Mendes', 'img' => '/media/poster/mendes2.jpg', 'genres' => 'guerra'],
-        ['id' => 3, 'title' => 'Quei bravi ragazzi', 'director' => 'M. Scorsese', 'img' => '/media/poster/scorsese.webp', 'genres' => 'noir'],
-        ['id' => 5, 'title' => 'Lost in Translation', 'director' => 'S. Coppola', 'img' => '/media/poster/coppola.jpg', 'genres' => 'drammatico'],
-    ];
-
-    public function movieList(){
-        return view('movie.movies', ['movies' => $this->movies]);
-    }
-
-    public function movieDetail($id){
-        foreach($this->movies as $movie){
-            if($id == $movie['id']){
-                return view('movie.movie-detail', ['movie' => $movie]);
-            }
+    private function ensureSampleMovies(): void
+    {
+        if (Movie::count() > 0) {
+            return;
         }
 
-        abort(404);
+        Movie::create([
+            'title' => 'Incontri ravvicinati del terzo tipo',
+            'director' => 'S. Spielberg',
+            'year' => '1977',
+            'plot' => 'Un film di fantascienza classico e iconico.',
+            'genres' => 'sci-fi',
+            'img' => '/media/poster/spielberg.jpg',
+        ]);
+    }
+
+    public function movieList()
+    {
+        $this->ensureSampleMovies();
+
+        $movies = Movie::query()
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($movie) => $movie->toArray())
+            ->all();
+
+        return view('movie.movies', ['movies' => $movies]);
+    }
+
+    public function movieDetail(int $id)
+    {
+        $this->ensureSampleMovies();
+
+        $movie = Movie::findOrFail($id)->toArray();
+
+        return view('movie.movie-detail', ['movie' => $movie]);
+    }
+
+    public function create()
+    {
+        return view('movie.create');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'director' => ['required', 'string', 'max:255'],
+            'year' => ['required', 'string', 'max:20'],
+            'plot' => ['required', 'string'],
+        ]);
+
+        $movie = Movie::create(array_merge($data, [
+            'genres' => $request->input('genres', 'sconosciuto'),
+            'img' => $request->input('img', '/media/poster/default.jpg'),
+        ]));
+
+        return redirect()->route('movie.detail', ['id' => $movie->id]);
     }
 }
