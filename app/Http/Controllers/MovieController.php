@@ -57,12 +57,19 @@ class MovieController extends Controller
             'director' => ['required', 'string', 'max:255'],
             'year' => ['required', 'string', 'max:20'],
             'plot' => ['required', 'string'],
+            'genres' => ['nullable', 'string', 'max:255'],
+            'img' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $movie = Movie::create(array_merge($data, [
-            'genres' => $request->input('genres', 'sconosciuto'),
-            'img' => $request->input('img', '/media/poster/default.jpg'),
-        ]));
+        
+        $movie = Movie::create([
+            'title' => $data['title'],
+            'director' => $data['director'],
+            'year' => $data['year'],
+            'plot' => $data['plot'],
+            'genres' => $data['genres'] ?? 'sconosciuto',
+            'img' => $data['img'] ?? '/media/poster/default.jpg',
+        ]);
 
         return redirect()->route('movie.detail', ['id' => $movie->id]);
     }
