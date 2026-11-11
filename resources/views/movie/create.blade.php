@@ -5,7 +5,7 @@
     </div>
     <div class="row justify-content-center">
         <div class="col-12 col-md-8">
-            <form method="POST" action="{{ route('movie.store') }}">
+            <form method="POST" action="{{ route('movie.submit') }}">
                 @csrf
                 <div class="mb-3">
                     <label for="title" class="form-label">titolo:</label>
