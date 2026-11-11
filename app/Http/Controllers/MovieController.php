@@ -7,70 +7,32 @@ use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
-    private function ensureSampleMovies(): void
-    {
-        if (Movie::count() > 0) {
-            return;
-        }
-
-        Movie::create([
-            'title' => 'Incontri ravvicinati del terzo tipo',
-            'director' => 'S. Spielberg',
-            'year' => '1977',
-            'plot' => 'Un film di fantascienza classico e iconico.',
-            'genres' => 'sci-fi',
-            'img' => '/media/poster/spielberg.jpg',
-        ]);
-    }
-
     public function movieList()
     {
-        $this->ensureSampleMovies();
-
-        $movies = Movie::query()
-            ->orderBy('id')
-            ->get()
-            ->map(fn ($movie) => $movie->toArray())
-            ->all();
+        $movies = Movie::orderBy('id')->get();
 
         return view('movie.movies', ['movies' => $movies]);
     }
 
-    public function movieDetail(int $id)
-    {
-        $this->ensureSampleMovies();
-
-        $movie = Movie::findOrFail($id)->toArray();
-
-        return view('movie.movie-detail', ['movie' => $movie]);
-    }
-
+   
     public function create()
     {
         return view('movie.create');
     }
 
+    // Salvataggio nel DB dei dati inseriti dall'utente tramite form
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'director' => ['required', 'string', 'max:255'],
             'year' => ['required', 'string', 'max:20'],
             'plot' => ['required', 'string'],
-            'genres' => ['nullable', 'string', 'max:255'],
-            'img' => ['nullable', 'string', 'max:255'],
         ]);
 
-        
-        $movie = Movie::create([
-            'title' => $data['title'],
-            'director' => $data['director'],
-            'year' => $data['year'],
-            'plot' => $data['plot'],
-            'genres' => $data['genres'] ?? 'sconosciuto',
-            'img' => $data['img'] ?? '/media/poster/default.jpg',
-        ]);
+        Movie::create($validated);
 
-        return redirect()->route('movie.detail', ['id' => $movie->id]);
+       
+        return redirect()->route('movie.list')->with('success', 'Film inserito con successo!');
     }
 }
